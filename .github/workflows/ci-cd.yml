@@ -1,9 +1,9 @@
-name: Primer flujo de trabajo CI/CD (Build, Test and Push Docker Image)
+name: CI/CD Pipeline con Multi-stage Docker
 
 on:
   push:
     branches:
-      - '**' # Esto ejecutará el pipeline en cualquier rama
+      - '**'
 
 permissions:
   contents: read
@@ -14,17 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4 # Actualizado a v4
-
-      - name: Configuración Java para TEST y Build
-        uses: actions/setup-java@v3
-        with:
-          distribution: 'temurin'
-          java-version: '17' # Cambia a 23 si es estrictamente necesario
-          cache: 'maven' # Añadir caché acelera mucho los builds posteriores
-
-      - name: Construir proyecto con Maven (Genera el .jar)
-        run: mvn clean package -DskipTests # -DskipTests opcional si quieres ir más rápido
+        uses: actions/checkout@v4
 
       - name: Login to GHCR
         uses: docker/login-action@v3
@@ -38,5 +28,5 @@ jobs:
         with:
           context: .
           push: true
-          # Usamos la variable del repositorio para que coincida exactamente con el examen
+          # Usamos la variable automática para el nombre del repo del examen
           tags: ghcr.io/${{ github.repository }}:latest
