@@ -1,0 +1,23 @@
+services:
+  database:
+    image: mariadb:latest
+    container_name: mariadb_examen
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      MYSQL_DATABASE: hogwarts_ejm
+      MYSQL_USER: examen_ejm
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "3306:3306"
+
+  app:
+    image: ghcr.io/${GITHUB_REPOSITORY}:latest
+    container_name: springboot_app
+    depends_on:
+      - database
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mariadb://database:3306/hogwarts_ejm
+      SPRING_DATASOURCE_USERNAME: examen_ejm
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "8080:8080"
