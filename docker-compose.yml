@@ -1,37 +1,37 @@
 services:
-  # Servicio de Base de Datos
   database:
-    image: mariadb:10.11 # O la versión que prefieras
+    image: mariadb:10.11
     container_name: mariadb_hogwarts
     restart: always
+    env_file:
+      - .env
     environment:
-      # Estos nombres deben coincidir con lo que pide el examen
-      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD} # Se define en los secretos/variables
-      MYSQL_DATABASE: hogwarts_ejm           # <--- Cambia xxx por tu identificador
-      MYSQL_USER: examen_ejm                 # <--- Cambia xxx por tu identificador
-      MYSQL_PASSWORD: ${DB_PASSWORD}         # Se define en los secretos/variables
+      # Las variables se leen del archivo .env
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      MYSQL_DATABASE: hogwarts_${EXAMEN_SUFFIX}
+      MYSQL_USER: examen_${EXAMEN_SUFFIX}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
     ports:
       - "3306:3306"
     volumes:
       - db_data:/var/lib/mysql
 
-  # Servicio de la Aplicación Java
   app:
-    # IMPORTANTE: Esta es la imagen que genera tu GitHub Actions
-    image: ghcr.io/imoya-21/examen_aaee_eval3:latest
-    container_name: app_mapamundi
-    depends_on:
-      - database
-    restart: always
-    environment:
-      # Configuración para que Spring Boot encuentre la base de datos
-      SPRING_DATASOURCE_URL: jdbc:mariadb://database:3306/hogwarts_xxx
-      SPRING_DATASOURCE_USERNAME: examen_xxx
-      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
-      # Si tu aplicación usa Hibernate para crear las tablas automáticamente:
-      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+    image: ghcr.io/imoya-21/aaee_mapamundi_sb:latest
+    container_name: aaee_mapamundi_app_imy
     ports:
       - "8080:8080"
+    env_file:
+      - .env
+    restart: always
+    depends_on:
+      - database
+    environment:
+      # Configuración de conexión para Spring Boot
+      SPRING_DATASOURCE_URL: jdbc:mariadb://database:3306/hogwarts_${EXAMEN_SUFFIX}
+      SPRING_DATASOURCE_USERNAME: examen_${EXAMEN_SUFFIX}
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
 
 volumes:
   db_data:
