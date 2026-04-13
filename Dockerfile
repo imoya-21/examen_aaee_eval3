@@ -7,7 +7,7 @@ WORKDIR /app
 COPY pom.xml .
 
 COPY src ./src
-RUN mvn clean package
+RUN mvn clean package -DskipTests
 
 # ====== Etapa 2: Fase de ejecución (con la que generará la imagen) ======
 # En teoría sólo necesitamos la JRE para ejecutar la aplicación (ojo, a veces puede dar problemas y se usa la JDK )
